@@ -23,7 +23,7 @@ class SerializeEmptyPropertiesTest {
 
     @Test
     void testJacksonSerializationWithEmptyProperties() throws IOException {
-        var testModel = new TestBean();
+        var testModel = new TestBean("", new String[0]);
 
         var testModelStr = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(testModel);
 
@@ -31,12 +31,33 @@ class SerializeEmptyPropertiesTest {
     }
 
     @Test
+    void testJacksonSerializationAndDeserializationWithEmptyProperties() throws IOException {
+        var jacksonObjectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+        var testModel = new TestBean("", new String[0]);
+
+        var testModelStr = jacksonObjectMapper.writeValueAsString(testModel);
+        var testModelCopy = jacksonObjectMapper.readValue(testModelStr, TestBean.class);
+
+        Assertions.assertEquals(testModel, testModelCopy);
+    }
+
+    @Test
     void testMicronautSerializationWithEmptyProperties() throws IOException {
-        var testModel = new TestBean();
+        var testModel = new TestBean("", new String[0]);
 
         var testModelStr = objectMapper.writeValueAsString(testModel);
 
         Assertions.assertEquals("{\"str\":\"\",\"strArr\":[]}", testModelStr);
+    }
+
+    @Test
+    void testMicronautSerializationAndDeserializationWithEmptyProperties() throws IOException {
+        var testModel = new TestBean("", new String[0]);
+
+        var testModelStr = objectMapper.writeValueAsString(testModel);
+        var testModelCopy = objectMapper.readValue(testModelStr, TestBean.class);
+
+        Assertions.assertEquals(testModel, testModelCopy);
     }
 
     @Test

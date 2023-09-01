@@ -8,6 +8,6 @@ public class TestController {
 
     @Get("/test")
     public TestBean getTest() {
-        return new TestBean();
+        return new TestBean("", new String[0]);
     }
 }
