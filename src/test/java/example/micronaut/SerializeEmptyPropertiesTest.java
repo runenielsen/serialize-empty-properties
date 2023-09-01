@@ -1,5 +1,8 @@
 package example.micronaut;
 
+import io.micronaut.http.HttpRequest;
+import io.micronaut.http.client.HttpClient;
+import io.micronaut.http.client.annotation.Client;
 import io.micronaut.serde.ObjectMapper;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import org.junit.jupiter.api.Assertions;
@@ -11,15 +14,15 @@ import java.io.IOException;
 class SerializeEmptyPropertiesTest {
 
     private final ObjectMapper objectMapper;
+    private final HttpClient httpClient;
 
-    public SerializeEmptyPropertiesTest(ObjectMapper objectMapper) {
+    public SerializeEmptyPropertiesTest(ObjectMapper objectMapper, @Client("/") HttpClient httpClient) {
         this.objectMapper = objectMapper;
+        this.httpClient = httpClient;
     }
 
     @Test
-    void testJacksonSerializationWithJsonIgnoreProperties() throws IOException {
-        // It is intentional for the purpose of the test, that I have set the discriminator property to something that
-        // doesn't match the class of the bean here. The value shouldn't matter, since it should be ignored.
+    void testJacksonSerializationWithEmptyProperties() throws IOException {
         var testModel = new TestBean();
 
         var testModelStr = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(testModel);
@@ -28,13 +31,21 @@ class SerializeEmptyPropertiesTest {
     }
 
     @Test
-    void testMicronautSerializationWithJsonIgnoreProperties() throws IOException {
-        // It is intentional for the purpose of the test, that I have set the discriminator property to something that
-        // doesn't match the class of the bean here. The value shouldn't matter, since it should be ignored.
+    void testMicronautSerializationWithEmptyProperties() throws IOException {
         var testModel = new TestBean();
 
         var testModelStr = objectMapper.writeValueAsString(testModel);
 
         Assertions.assertEquals("{\"str\":\"\",\"strArr\":[]}", testModelStr);
+    }
+
+    @Test
+    void testControllerResponseWithEmptyProperties() {
+        var request = HttpRequest.GET("/test");
+        var response = httpClient.toBlocking().exchange(request, String.class);
+        var body = response.getBody(String.class).orElseThrow();
+
+        Assertions.assertEquals(200, response.getStatus().getCode());
+        Assertions.assertEquals("{\"str\":\"\",\"strArr\":[]}", body);
     }
 }
